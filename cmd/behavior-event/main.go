@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"strings"
 
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 
@@ -11,10 +12,10 @@ import (
 )
 
 var (
-	// brokerList        = kingpin.Flag("brokerList", "List of brokers to connect").Default("kafka-cnngsdeiyyw4eovl.kafka.ivolces.com:9092").Strings()
-	brokerList        = kingpin.Flag("brokerList", "List of brokers to connect").Default("kafka-cnngs4hyab3gkhlo.kafka.cn-beijing.ivolces.com:9092").Strings()
-	topic             = kingpin.Flag("topic", "Topic name").Default("appsflyer_push_event").String()
-	groupID           = kingpin.Flag("group", "Consumer group id").Default("my-group").String() // 新增
+	brokerList        = kingpin.Flag("brokerList", "List of brokers to connect").Default("o-00408480ej1a-default.bmq.ivolces.com:9092").Strings()
+	// 用户的行为数据
+	topic             = kingpin.Flag("topic", "Topic name").Default("behavior_event").String()
+	groupID           = kingpin.Flag("group", "Consumer group id").Default("growth-appsflyer-s2s-consumer-test").String() // 新增
 	partition         = kingpin.Flag("partition", "Partition number").Default("0").String()
 	offsetType        = kingpin.Flag("offsetType", "Offset Type (OffsetNewest | OffsetOldest)").Default("-1").Int()
 	messageCountStart = kingpin.Flag("messageCountStart", "Message counter start from:").Int()
@@ -48,7 +49,9 @@ func main() {
 				log.Println(err)
 			case msg := <-consumer.Messages():
 				*messageCountStart++
-				log.Println("Received messages", string(msg.Key), string(msg.Value))
+				if strings.Contains(string(msg.Value), "predefine_pageview") {
+					log.Println("Received messages", string(msg.Key), string(msg.Value))
+				}
 			case <-signals:
 				log.Println("Interrupt is detected")
 				doneCh <- struct{}{}
